@@ -10,7 +10,6 @@ from django.core.urlresolvers import reverse
 from posts.models import Post
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from comments.models import Comment
-from django.core.exceptions import ObjectDoesNotExist
 
 
 def home(request):

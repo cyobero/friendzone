@@ -22,10 +22,13 @@ class Comment(models.Model):
     user = models.ForeignKey(User)
     post = models.ForeignKey(Post)
     comment = models.TextField()
-    likes = models.IntegerField(default=0, null=True)
+    likes = models.IntegerField(default=0)
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
 
     objects = PostManager()
+
+    def like_comment(self):
+        self.likes += 1
 
     def __unicode__(self):
         return str(self.user.username)

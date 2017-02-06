@@ -61,10 +61,14 @@
                                 <a href="#"> Delete Post</a>
                                 {% endif %}
                             </p>
-                                <strong>posted by </strong><a href="{% url 'profile_page' comment.user %}">
-                                    {{ comment.user }}</a>
-                                 on {{ comment.timestamp|date:"F, d, Y, g:i A" }} CST <br>
-                                <a href="#"><i class="fa fa-thumbs-o-up fa-2x" aria-hidden="true"></i></a>
+                            <strong>posted by </strong><a href="{% url 'profile_page' comment.user %}">
+                            {{ comment.user }}</a>
+                            on {{ comment.timestamp|date:"F, d, Y, g:i A" }} CST <br>
+                            <form action="" method="get">
+                                <input type="hidden" name="like">
+                                <a href="#"><i class="fa fa-thumbs-o-up fa-2x" aria-hidden="true"></i>
+                                </a> {{ comment.likes }} likes
+                            </form>
                             </p>
 
                             <hr>
