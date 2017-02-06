@@ -1,0 +1,83 @@
+{% extends 'home.html' %}
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% block title %}
+    <title>{{ post.title }}</title>
+    {% endblock %}
+</head>
+<body>
+{% block nav-active %}
+<li><a href="{% url 'home' %}">Home <span class="sr-only">(current)</span></a></li>
+<li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+       aria-expanded="false">{{ request.user.first_name }} <span class="caret"></span></a>
+    <ul class="dropdown-menu">
+        <li class="active"><a href="{% url 'profile_page' user %}">My Account</a></li>
+        <li><a href="{% url 'edit_profile' %}">Edit Account Information</a></li>
+    </ul>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-2"></div>
+        <div class="col-lg-8">
+            <div class="panel">
+                <div class="panel-body">
+                    <h2>{{ post.title }}</h2>
+                    by
+                    <img src="{{ post.get_img_thumbnail }}" class="img-circle" height="33" width="35">
+                    <a class="lead" href="{% url 'profile_page' post.author %}">
+                        <small>{{ post.author.username }}</small>
+                    </a></p>
+                    <p><i class="icon-time"></i> Posted on {{ post.timestamp|date:"F, d, Y, g:i A" }}</p>
+
+                    <hr>
+                    {{ post.content }}
+
+                    <hr>
+                    <!-- This is where the comments will go -->
+                    <div>
+                        <p class="lead">Answers <br><font size="2">{{ comment_count }} answer{{ comment_count|pluralize }}
+                        </font></p>
+                        <div class="">
+                            <form id="answer_form" role="form" action="" method="post">
+                                {% csrf_token %}
+                                {{ form.as_p }}
+                                <input type="submit" class="btn btn-primary btn-sm" value="Answer Question">
+                            </form>
+                        </div>
+                        <hr>
+                        {% for comment in comments %}
+                        <div>
+                            <p>
+                                {{ comment.comment }}
+                                {% if comment.user == request.user %}
+                                <a href="#"> Delete Post</a>
+                                {% endif %}
+                            </p>
+                                <strong>posted by </strong><a href="{% url 'profile_page' comment.user %}">
+                                    {{ comment.user }}</a>
+                                 on {{ comment.timestamp|date:"F, d, Y, g:i A" }} CST <br>
+                                <a href="#"><i class="fa fa-thumbs-o-up fa-2x" aria-hidden="true"></i></a>
+                            </p>
+
+                            <hr>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2"></div>
+    </div>
+</div>
+{% endblock %}
+
+</body>
+</html>

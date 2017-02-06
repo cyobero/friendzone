@@ -1,0 +1,32 @@
+{% extends 'home.html' %}
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block title %}
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="2;url={% url 'profile_page' user %}" />
+    <title>Edit Profile Success</title>
+    {% endblock %}
+</head>
+<body>
+{% block nav-active %}
+<li class=><a href="{% url 'home' %}">Home <span class="sr-only">(current)</span></a></li>
+<li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+       aria-expanded="false">Account <span class="caret"></span></a>
+    <ul class="dropdown-menu">
+        <li><a href="{% url 'profile_page' user %}">My Account</a></li>
+        <li><a href="#">Edit Account Information</a></li>
+    </ul>
+</li>
+<li><a href="#">Ask a Question</a></li>
+{% endblock %}
+
+{% block content %}
+<h2 align="center">You've successfully changed your profile!</h2>
+{% endblock %}
+
+</body>
+</html>

@@ -1,0 +1,80 @@
+{% extends 'home.html' %}
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% block title %}
+    <title>User Profile</title>
+    {% endblock %}
+</head>
+<body>
+{% block nav-active %}
+<li><a href="{% url 'home' %}">Home <span class="sr-only">(current)</span></a></li>
+<li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                       aria-expanded="false">{{ request.user.first_name }} <span class="caret"></span></a>
+    <ul class="dropdown-menu">
+        <li class="active"><a href="#">My Account</a></li>
+        <li><a href="{% url 'edit_profile' %}">Edit Account Information</a></li>
+    </ul>
+</li>
+{% endblock %}
+
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class=" col-lg-offset-3 col-lg-6">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="row">
+                                <div class="col-sm-offset-3 col-sm-6 col-md-offset-3 col-md-6 col-lg-offset-3 col-lg-6">
+                                    <img class="img-circle img-responsive" src="{{ user_profile.profile_pic.url }}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="row">
+                                <div class="centered-text col-sm-offset-3 col-sm-6 col-md-offset-3 col-md-6 col-lg-offset-3 col-lg-6">
+                                    <div itemscope="" itemtype="http://schema.org/Person"><br>
+                                        <span>
+                                            <form id="pic_upload" class="form-singin" action="" method="post" enctype="multipart/form-data">
+                                                {% csrf_token %}
+                                                {{ form }}<br>
+                                                <input type="submit" class="btn btn-primary btn-sm" value="Upload">
+                                            </form>
+                                        </span>
+                                        <h2> <span itemprop="name">{{ user.username }}</span></h2>
+                                        <p itemprop="jobTitle">First Name: {{ user.first_name }}</p>
+                                        <p><span itemprop="affiliation">Last Name: {{ user.last_name }}</span></p>
+                                        <p>
+                                            <i class="fa fa-birthday-cake"></i> <span itemprop="birthDate">Age: {{ age }}</span>
+                                        </p>
+                                         {% if user_profile.gender == 'F' %}
+                                            <p><i class="fa fa-venus-mars"></i> Gender: Female</p>
+                                        {% else %}
+                                            <p><i class="fa fa-venus-mars"></i> Gender: Male</p>
+                                        {% endif %}
+                                        <p itemprop="email"> <i class="fa fa-envelope"> </i> <a href="mailto:you@somedomain.com">{{ user.email }}</a> </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 centered-text">
+                            {% if user_profile.bio %}
+                                {{ user_profile.bio }}
+                            {% else %}
+                                You have yet to enter a bio.
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+{% endblock %}
+
+</body>
+</html>
