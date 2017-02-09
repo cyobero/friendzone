@@ -30,6 +30,9 @@ class Comment(models.Model):
     def like_comment(self):
         self.likes += 1
 
+    def get_absolute_url(self):
+        return '/post/%i/' % self.post.id
+
     def __unicode__(self):
         return str(self.user.username)
 

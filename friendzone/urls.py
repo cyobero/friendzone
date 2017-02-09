@@ -31,6 +31,7 @@ urlpatterns = [
     url(r'^profile/edit/$', edit_profile, name='edit_profile'),
     url(r'^profile/edit/success/$', edit_profile_success, name='edit_profile_success'),
     url(r'^post/(\d+)/$', post, name='post'),
+    url(r'^post/delete-comment/(?P<id>.*)/$', delete_comment, name='delete_comment'),
 ]
 
 if settings.DEBUG:

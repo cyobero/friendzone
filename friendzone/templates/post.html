@@ -57,8 +57,8 @@
                         <div>
                             <p>
                                 {{ comment.comment }}
-                                {% if comment.user == request.user %}
-                                <a href="#"> Delete Post</a>
+                                {% if user.is_authenticated and comment.user == request.user %}
+                                <a href="{% url 'delete_comment' comment.id %}">Delete Comment</a>
                                 {% endif %}
                             </p>
                             <strong>posted by </strong><a href="{% url 'profile_page' comment.user %}">

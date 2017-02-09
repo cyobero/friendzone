@@ -261,7 +261,20 @@ def post(request, post_id):
             'post': post,
             'form': form,
             'comment_count': comment_count})
+    else:
+        return HttpResponseRedirect(reverse('home'))
 
 
 def about(request):
     return render(request, 'about.html')
+
+
+@login_required
+def delete_comment(request, id):
+    comment = get_object_or_404(Comment, id=id)
+
+    if comment.user.id != request.user.id:
+        raise Http404
+    comment.delete()
+
+    return HttpResponseRedirect(comment.get_absolute_url())
