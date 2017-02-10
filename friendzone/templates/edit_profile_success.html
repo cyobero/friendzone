@@ -19,8 +19,8 @@
     <ul class="dropdown-menu">
         <li><a href="{% url 'profile_page' user %}">My Account</a></li>
         <li><a href="#">Edit Account Information</a></li>
-        <li><a href="#">Messages</a></li>
     </ul>
+    <li><a href="{% url 'messages' %}"><i class="fa fa-envelope fa-lg" aria-hidden="true"></i></a></li>
 </li>
 <li><a href="#">Ask a Question</a></li>
 {% endblock %}

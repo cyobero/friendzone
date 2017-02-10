@@ -132,3 +132,10 @@ class AnswerForm(forms.Form):
         'class': 'form-control',
         'rows': '4'
     }))
+
+
+class MessageForm(forms.Form):
+    message = forms.CharField(label='', widget=forms.Textarea(attrs={
+        'class': 'form-control',
+        'rows': '4'
+    }))

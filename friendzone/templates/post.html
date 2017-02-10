@@ -19,6 +19,7 @@
         <li class="active"><a href="{% url 'profile_page' user %}">My Account</a></li>
         <li><a href="{% url 'edit_profile' %}">Edit Account Information</a></li>
     </ul>
+    <li><a href="{% url 'messages' %}"><i class="fa fa-envelope fa-lg" aria-hidden="true"></i></a></li>
 </li>
 {% endblock %}
 
@@ -55,20 +56,19 @@
                         <hr>
                         {% for comment in comments %}
                         <div>
+                            <blockquote style="font-size:14px">
                             <p>
                                 {{ comment.comment }}
                                 {% if user.is_authenticated and comment.user == request.user %}
                                 <a href="{% url 'delete_comment' comment.id %}">Delete Comment</a>
                                 {% endif %}
                             </p>
-                            <strong>posted by </strong><a href="{% url 'profile_page' comment.user %}">
+                            <footer class="blockquote-footer" style="font-size:13px"><strong>posted by </strong><a href="{% url 'profile_page' comment.user %}">
                             {{ comment.user }}</a>
-                            on {{ comment.timestamp|date:"F, d, Y, g:i A" }} CST <br>
-                            <form action="" method="get">
-                                <input type="hidden" name="like">
-                                <a href="#"><i class="fa fa-thumbs-o-up fa-2x" aria-hidden="true"></i>
-                                </a> {{ comment.likes }} likes
-                            </form>
+                            on {{ comment.timestamp|date:"F, d, Y, g:i A" }} CST
+                            </footer><br>
+                            <a href="#">Reply</a>
+                            </blockquote>
                             </p>
 
                             <hr>

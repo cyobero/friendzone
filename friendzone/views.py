@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse, Http404
-from forms import SignInForm, RegistrationForm, ChangeProfilePic, EditProfile, QuestionForm, AnswerForm
+from forms import SignInForm, RegistrationForm, ChangeProfilePic, EditProfile, QuestionForm, AnswerForm, MessageForm
 from django.contrib.auth.models import User
 from users.models import UserProfile
 from django.db import IntegrityError
@@ -24,7 +24,7 @@ def home(request):
                 form = form.clean()
                 title = form['title']
                 content = form['content']
-                anonymous = form['anonymous']
+                # anonymous = form['anonymous']
 
                 # Create Post object
                 Post.objects.create_post(title=title, author=user, content=content).save()
@@ -159,7 +159,7 @@ def user_logout(request):
 
 def profile_page(request, username):
     if request.user.is_authenticated():
-        user = User.objects.get(username=username)
+        user = get_object_or_404(User, username=username)
         user_profile = UserProfile.objects.get(user=user)
         age = user_profile.calculate_age()
 
@@ -171,11 +171,12 @@ def profile_page(request, username):
             # Save profile pic
             user_profile.profile_pic = profile_pic
             user_profile.save()
-            return render(request, 'profile.html',
-                          {'form': form, 'user': user, 'user_profile': user_profile, 'age': age})
         else:
             form = ChangeProfilePic()
             return render(request, 'profile.html',
+                          {'form': form, 'user': user, 'user_profile': user_profile, 'age': age})
+
+        return render(request, 'profile.html',
                           {'form': form, 'user': user, 'user_profile': user_profile, 'age': age})
     else:
         return HttpResponseRedirect(reverse('home'))
@@ -232,15 +233,15 @@ def edit_profile_success(request):
         return HttpResponseRedirect(reverse('home'))
 
 
-def post(request, post_id):
+def post(request, username, post_id):
     if request.user.is_authenticated():
-        user = request.user
         try:
             post_id = int(post_id)
         except ValueError:
             raise Http404
 
         post = Post.objects.get(id=post_id)
+        user = User.objects.get(id=post.author_id)
 
         if request.method == 'POST':
             form = AnswerForm(request.POST)
@@ -250,8 +251,8 @@ def post(request, post_id):
                 answer = form['comment']
 
             # Create Comment object
-            Comment.objects.create_post(user=user, post=post, comment=answer).save()
-            return HttpResponseRedirect('#')
+            Comment.objects.create_post(user=request.user, post=post, comment=answer).save()
+            return HttpResponseRedirect(post.get_absolute_url())
 
         form = AnswerForm()
         comments = Comment.objects.filter(post_id=post_id)
@@ -270,11 +271,15 @@ def about(request):
 
 
 @login_required
-def delete_comment(request, id):
-    comment = get_object_or_404(Comment, id=id)
+def delete_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
 
     if comment.user.id != request.user.id:
         raise Http404
     comment.delete()
-
     return HttpResponseRedirect(comment.get_absolute_url())
+
+
+@login_required
+def messages(request):
+    return render(request, 'messages.html')

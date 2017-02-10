@@ -34,7 +34,7 @@ class Post(models.Model):
             return self.content
 
     def get_absolute_url(self):
-        return '/post/%i/' % self.id
+        return '/%s/post/%i/' % (self.author.username, self.id)
 
     def get_img_thumbnail(self):
         author = self.author_id

@@ -23,6 +23,7 @@ class Comment(models.Model):
     post = models.ForeignKey(Post)
     comment = models.TextField()
     likes = models.IntegerField(default=0)
+    replies = models.TextField(null=True)
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
 
     objects = PostManager()
@@ -31,7 +32,7 @@ class Comment(models.Model):
         self.likes += 1
 
     def get_absolute_url(self):
-        return '/post/%i/' % self.post.id
+        return '/%s/post/%i/' % (self.post.author, self.post.id)
 
     def __unicode__(self):
         return str(self.user.username)
