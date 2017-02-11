@@ -32,6 +32,7 @@ urlpatterns = [
     url(r'^profile/edit/$', edit_profile, name='edit_profile'),
     url(r'^profile/edit/success/$', edit_profile_success, name='edit_profile_success'),
     url(r'^(?P<username>\w+)/post/(?P<post_id>.*)/$', post, name='post'),
+    url(r'^post/delete-post/(?P<post_id>.*)/$', delete_post, name='delete_post'),
     url(r'^post/delete-comment/(?P<comment_id>.*)/$', delete_comment, name='delete_comment'),
 ]
 
