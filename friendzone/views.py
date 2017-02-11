@@ -10,6 +10,7 @@ from django.core.urlresolvers import reverse
 from posts.models import Post
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from comments.models import Comment
+from inbox.models import Message
 
 
 def home(request):
@@ -44,7 +45,8 @@ def home(request):
             posts = paginator.page(paginator.num_pages)
 
         form = QuestionForm()
-        return render(request, 'home.html', {'posts': posts, 'user_profile': user_profile, 'form': form})
+        comments = Comment.objects.all()
+        return render(request, 'home.html', {'posts': posts, 'user_profile': user_profile, 'form': form, 'comments': comments})
 
     else:
         return HttpResponseRedirect(reverse('login'))
@@ -177,7 +179,9 @@ def profile_page(request, username):
                           {'form': form, 'user': user, 'user_profile': user_profile, 'age': age})
 
         return render(request, 'profile.html',
-                          {'form': form, 'user': user, 'user_profile': user_profile, 'age': age})
+                      {'form': form,
+                       'user': user, 'user_profile': user_profile,
+                       'age': age})
     else:
         return HttpResponseRedirect(reverse('home'))
 
@@ -278,6 +282,16 @@ def delete_comment(request, comment_id):
         raise Http404
     comment.delete()
     return HttpResponseRedirect(comment.get_absolute_url())
+
+
+@login_required
+def delete_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+
+    if post.author.id != request.user.id:
+        raise Http404
+    post.delete()
+    return HttpResponseRedirect(reverse('home'))
 
 
 @login_required
