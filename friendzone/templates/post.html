@@ -16,7 +16,7 @@
     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
        aria-expanded="false">{{ request.user.first_name }} <span class="caret"></span></a>
     <ul class="dropdown-menu">
-        <li class="active"><a href="{% url 'profile_page' user %}">My Account</a></li>
+        <li class="active"><a href="{% url 'profile_page' user.username %}">My Account</a></li>
         <li><a href="{% url 'edit_profile' %}">Edit Account Information</a></li>
     </ul>
     <li><a href="{% url 'messages' %}"><i class="fa fa-envelope fa-lg" aria-hidden="true"></i></a></li>
@@ -39,7 +39,10 @@
                     <p><i class="icon-time"></i> Posted on {{ post.timestamp|date:"F, d, Y, g:i A" }}</p>
 
                     <hr>
-                    {{ post.content }}
+                    {{ post.content }}<br>
+                    {% if user.is_authenticated and post.author == request.user %}
+                    <a href="{% url 'delete_post' post.id %}">Delete Question</a>
+                    {% endif %}
 
                     <hr>
                     <!-- This is where the comments will go -->
