@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse, Http404
-from forms import SignInForm, RegistrationForm, ChangeProfilePic, EditProfile, QuestionForm, AnswerForm, MessageForm
+from forms import SignInForm, RegistrationForm, ChangeProfilePic, EditProfile, QuestionForm, CommentForm, ReplyForm
 from django.contrib.auth.models import User
 from users.models import UserProfile
 from django.db import IntegrityError
@@ -10,7 +10,7 @@ from django.core.urlresolvers import reverse
 from posts.models import Post
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from comments.models import Comment
-from inbox.models import Message
+import datetime
 
 
 def home(request):
@@ -70,6 +70,16 @@ def register(request):
             birth_date = form['birth_date']
             gender = form['gender']
             username = form['username']
+
+            # Verify if user is at least 13 years or older.
+            user_birthdate = '%s/%s/%s' % (str(birth_date.year), str(birth_date.month), str(birth_date.day))
+            user_birthdate = datetime.datetime.strptime(user_birthdate, '%Y/%m/%d')
+            today = datetime.datetime.today()
+            age = (today - user_birthdate).days/365.2424
+            if age < 13:
+                errors.append("You must be at least 13 years or older to register for FriendZone.")
+                form = RegistrationForm(request.POST)
+                return render(request, 'registration.html', {'form': form, 'errors': errors})
 
             # Verify if passwords match
             if password != password_verify:
@@ -159,6 +169,22 @@ def user_logout(request):
     return HttpResponseRedirect(reverse('home'))
 
 
+def follow(request, username):
+    if request.user.is_authenticated():
+        user = get_object_or_404(User, username=username)
+        user_profile = get_object_or_404(UserProfile, user_id=user.id)
+        try:
+            follower = get_object_or_404(UserProfile, user_id=int(request.user.id))
+        except:
+            follower = None
+
+        user_profile.followers.add(follower)
+
+        return HttpResponseRedirect(reverse('profile_page', kwargs={'username': user.username}))
+    else:
+        return HttpResponseRedirect(reverse('home'))
+
+
 def profile_page(request, username):
     if request.user.is_authenticated():
         user = get_object_or_404(User, username=username)
@@ -180,7 +206,8 @@ def profile_page(request, username):
 
         return render(request, 'profile.html',
                       {'form': form,
-                       'user': user, 'user_profile': user_profile,
+                       'user': user,
+                       'user_profile': user_profile,
                        'age': age})
     else:
         return HttpResponseRedirect(reverse('home'))
@@ -248,17 +275,28 @@ def post(request, username, post_id):
         user = User.objects.get(id=post.author_id)
 
         if request.method == 'POST':
-            form = AnswerForm(request.POST)
+            form = CommentForm(request.POST)
 
             if form.is_valid():
                 form = form.clean()
                 answer = form['comment']
+                parent_object = None
+                try:
+                    parent_id = int(request.POST.get('parent_id'))
+                except:
+                    parent_id = None
 
-            # Create Comment object
-            Comment.objects.create_post(user=request.user, post=post, comment=answer).save()
+                if parent_id:
+                    parent_qs = Comment.objects.filter(id=parent_id)
+                    if parent_qs.exists() and parent_qs.count() == 1:
+                        parent_object = parent_qs.first()
+
+                # Create Comment object
+                Comment.objects.create_comment(user=request.user, post=post, comment=answer, parent=parent_object).save()
+
             return HttpResponseRedirect(post.get_absolute_url())
 
-        form = AnswerForm()
+        form = CommentForm()
         comments = Comment.objects.filter(post_id=post_id)
         comment_count = comments.count()
         return render(request, 'post.html', {
