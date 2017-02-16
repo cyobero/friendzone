@@ -11,14 +11,15 @@
 <body>
 {% block nav-active %}
 <li><a href="{% url 'home' %}">Home <span class="sr-only">(current)</span></a></li>
-<li class="dropdown">
+<li class="dropdown; active">
     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
        aria-expanded="false">{{ request.user.first_name }} <span class="caret"></span></a>
     <ul class="dropdown-menu">
         <li><a href="{% url 'profile_page' user %}">My Account</a></li>
         <li class="active"><a href="{% url 'edit_profile' %}">Edit Profile</a></li>
     </ul>
-    <li><a href="{% url 'messages' %}"><i class="fa fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+<li><a href="{% url 'messages' %}"><i class="fa fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+<li><a href="#">Follower Feed</a></li>
 </li>
 {% endblock %}
 

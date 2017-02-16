@@ -7,12 +7,7 @@ from users.models import UserProfile
 
 class PostManager(models.Manager):
     def create_post(self, title, author, content):
-        post = self.create(
-            title = title,
-            author = author,
-            content = content
-        )
-
+        post = self.create(title=title, author=author, content=content)
         return post
 
 

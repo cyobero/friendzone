@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse, Http404
-from forms import SignInForm, RegistrationForm, ChangeProfilePic, EditProfile, QuestionForm, CommentForm, ReplyForm
+from forms import SignInForm, RegistrationForm, ChangeProfilePic, EditProfile, QuestionForm, CommentForm, MessageForm
 from django.contrib.auth.models import User
 from users.models import UserProfile
 from django.db import IntegrityError
@@ -10,6 +10,7 @@ from django.core.urlresolvers import reverse
 from posts.models import Post
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from comments.models import Comment
+from inbox.models import Message
 import datetime
 
 
@@ -46,7 +47,10 @@ def home(request):
 
         form = QuestionForm()
         comments = Comment.objects.all()
-        return render(request, 'home.html', {'posts': posts, 'user_profile': user_profile, 'form': form, 'comments': comments})
+        return render(request, 'home.html', {'posts': posts,
+                                             'user_profile': user_profile,
+                                             'form': form,
+                                             'comments': comments})
 
     else:
         return HttpResponseRedirect(reverse('login'))
@@ -103,6 +107,7 @@ def register(request):
                     user = authenticate(username=username, password=password_verify)
                     login(request, user)
 
+                    return HttpResponseRedirect(reverse('home'))
                     return HttpResponseRedirect(reverse('home'))
                 except IntegrityError:
                     errors.append("The email address provided has already been registered.")
@@ -185,11 +190,29 @@ def follow(request, username):
         return HttpResponseRedirect(reverse('home'))
 
 
+def unfollow(request, username):
+    if request.user.is_authenticated():
+        user = get_object_or_404(User, username=username)
+        user_profile = get_object_or_404(UserProfile, user_id=user.id)
+        try:
+            follower = get_object_or_404(UserProfile, user_id=int(request.user.id))
+        except:
+            follower = None
+
+        user_profile.followers.remove(follower)
+
+        return HttpResponseRedirect(reverse('profile_page', kwargs={'username': user.username}))
+    else:
+        return HttpResponseRedirect(reverse('home'))
+
+
 def profile_page(request, username):
     if request.user.is_authenticated():
         user = get_object_or_404(User, username=username)
         user_profile = UserProfile.objects.get(user=user)
         age = user_profile.calculate_age()
+        followers = user_profile.followers.all()
+        followers = [follower.user_id for follower in followers]
 
         # Form that allows users to change their profile picture.
         if request.method == 'POST':
@@ -202,13 +225,14 @@ def profile_page(request, username):
         else:
             form = ChangeProfilePic()
             return render(request, 'profile.html',
-                          {'form': form, 'user': user, 'user_profile': user_profile, 'age': age})
+                          {'form': form, 'user': user, 'user_profile': user_profile, 'age': age, 'followers': followers})
 
         return render(request, 'profile.html',
                       {'form': form,
                        'user': user,
                        'user_profile': user_profile,
-                       'age': age})
+                       'age': age,
+                       'followers': followers})
     else:
         return HttpResponseRedirect(reverse('home'))
 
@@ -335,3 +359,31 @@ def delete_post(request, post_id):
 @login_required
 def messages(request):
     return render(request, 'messages.html')
+
+
+@login_required
+def send_message(request, username):
+    sender = request.user
+    recepient = get_object_or_404(User, username=username)
+
+    if request.method == 'POST':
+        form = MessageForm(request.POST)
+
+        if form.is_valid():
+            form = form.clean()
+            message = form['message']
+
+            # Create Message object
+            Message.objects.create_message(sender=sender, recepient=recepient, content=message).save()
+
+        return HttpResponse('<script type="text/javascript">window.close(); window.parent.location.href = "/";</script>')
+
+    else:
+        form = MessageForm()
+        return render(request, 'send_message.html', {'form': form, 'recepient': recepient})
+
+
+@login_required
+def messages(request):
+    messages = Message.objects.filter(recepient=request.user)
+    return render(request, 'messages.html', {'messages': messages})

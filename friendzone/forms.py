@@ -127,7 +127,7 @@ class QuestionForm(forms.Form):
     }))
 
 
-class AnswerForm(forms.Form):
+class CommentForm(forms.Form):
     comment = forms.CharField(label='', widget=forms.Textarea(attrs={
         'class': 'form-control',
         'rows': '4'
@@ -136,6 +136,13 @@ class AnswerForm(forms.Form):
 
 class MessageForm(forms.Form):
     message = forms.CharField(label='', widget=forms.Textarea(attrs={
+        'class': 'form-control',
+        'rows': '13'
+    }))
+
+
+class ReplyForm(forms.Form):
+    reply = forms.CharField(label='', widget=forms.Textarea(attrs={
         'class': 'form-control',
         'rows': '4'
     }))

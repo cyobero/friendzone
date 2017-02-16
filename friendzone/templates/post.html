@@ -16,10 +16,11 @@
     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
        aria-expanded="false">{{ request.user.first_name }} <span class="caret"></span></a>
     <ul class="dropdown-menu">
-        <li class="active"><a href="{% url 'profile_page' user.username %}">My Account</a></li>
-        <li><a href="{% url 'edit_profile' %}">Edit Account Information</a></li>
+        <li><a href="{% url 'profile_page' user.username %}">My Account</a></li>
+        <li><a href="{% url 'edit_profile' %}">Edit Profile</a></li>
     </ul>
-    <li><a href="{% url 'messages' %}"><i class="fa fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+<li><a href="{% url 'messages' %}"><i class="fa fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+<li><a href="#">Follower Feed</a></li>
 </li>
 {% endblock %}
 
@@ -36,7 +37,7 @@
                     <a class="lead" href="{% url 'profile_page' post.author %}">
                         <small>{{ post.author.username }}</small>
                     </a></p>
-                    <p><i class="icon-time"></i> Posted on {{ post.timestamp|date:"F, d, Y, g:i A" }}</p>
+                    <p><i class="icon-time"></i> Posted on {{ post.timestamp|date:"F, d, Y, g:i A" }} CST</p>
 
                     <hr>
                     {{ post.content }}<br>
@@ -47,7 +48,7 @@
                     <hr>
                     <!-- This is where the comments will go -->
                     <div>
-                        <p class="lead">Answers <br><font size="2">{{ comment_count }} answer{{ comment_count|pluralize }}
+                        <p class="lead">Answers <br><font size="2">{{ comment_count }} answer{{comment_count|pluralize}}
                         </font></p>
                         <div class="">
                             <form id="answer_form" role="form" action="" method="post">
@@ -56,26 +57,52 @@
                                 <input type="submit" class="btn btn-primary btn-sm" value="Answer Question">
                             </form>
                         </div>
-                        <hr>
-                        {% for comment in comments %}
+
+                       <hr>
+
                         <div>
-                            <blockquote style="font-size:14px">
-                            <p>
-                                {{ comment.comment }}
-                                {% if user.is_authenticated and comment.user == request.user %}
-                                <a href="{% url 'delete_comment' comment.id %}">Delete Comment</a>
+                            {% for comment in comments %}
+                                <blockquote>
+                                <p>
+                                    {{ comment.comment }}
+                                    {% if user.is_authenticated and comment.user == request.user %}
+                                    <a href="{% url 'delete_comment' comment.id %}">Delete Comment</a>
+                                    {% endif %}
+                                </p>
+                                <footer class="blockquote-footer" style="font-size:13px"><strong>posted by </strong><a
+                                        href="{% url 'profile_page' comment.user %}">
+                                    {{ comment.user }}</a>
+                                    on {{ comment.timestamp|date:"F, d, Y, g:i A" }} CST
+                                </footer>
+
+
+
+                                {% if comment_count > 0 %}
+                                <!-- Reply form -->
+                                <form id="reply" role="form" action="" method="post">
+                                    {% csrf_token %}
+                                    {{ form.as_p }}
+                                    <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                                    <input type="submit" name="reply" value="Reply" class="btn btn-default">
+                                    <input type="submit" name="upvote" value="Upvote" class=" btn btn-primary">
+                                </form>
                                 {% endif %}
-                            </p>
-                            <footer class="blockquote-footer" style="font-size:13px"><strong>posted by </strong><a href="{% url 'profile_page' comment.user %}">
-                            {{ comment.user }}</a>
-                            on {{ comment.timestamp|date:"F, d, Y, g:i A" }} CST
-                            </footer><br>
-                            <a href="#">Reply</a>
-                            </blockquote>
-                            </p>
+
+                                </blockquote>
+                                {% for child_comment in comment.children %}
+                                <blockquote>
+                                    <p>{{ child_comment.comment }}</p>
+                                </blockquote>
+                                {% endfor %}
+                                {% endfor %}
+
+
+
+
+
+
 
                             <hr>
-                            {% endfor %}
                         </div>
                     </div>
                 </div>

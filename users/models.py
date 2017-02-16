@@ -26,6 +26,7 @@ class UserProfile(models.Model):
     birth_date = models.DateField()
     profile_pic = models.ImageField(upload_to=upload_location, default='default.jpg')
     bio = models.TextField(blank=True, null=True)
+    followers = models.ManyToManyField('UserProfile', related_name='following')
 
     def get_username(self):
         return self.user.username
