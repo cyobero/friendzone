@@ -1,9 +1,13 @@
 from __future__ import unicode_literals
 from django.db import models
 from django.contrib.auth.models import User
+from django import template
 
 # Create your models here
 from posts.models import Post
+
+
+register = template.Library()
 
 
 class CommentManager(models.Manager):
@@ -28,7 +32,7 @@ class Comment(models.Model):
     def get_absolute_url(self):
         return '/%s/post/%i/' % (self.post.author, self.post.id)
 
-    def chlildren(self):  # Replies
+    def children(self):  # Replies
         return Comment.objects.filter(parent=self)
 
     @property
@@ -47,3 +51,8 @@ class Comment(models.Model):
 class Upvote(models.Model):
     user = models.ForeignKey(User)
     comment = models.ForeignKey(Comment)
+
+
+@property
+def sort(self):
+    return self.children_set.order_by('timestamp')

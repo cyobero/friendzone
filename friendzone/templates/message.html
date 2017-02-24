@@ -1,0 +1,65 @@
+{% extends 'home.html' %}
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+{% block nav-active %}
+<li><a href="{% url 'home' %}">Home <span class="sr-only">(current)</span></a></li>
+<li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+       aria-expanded="false">{{ request.user.first_name }} <span class="caret"></span></a>
+    <ul class="dropdown-menu">
+        <li><a href="{% url 'profile_page' user %}">Profile</a></li>
+        <li><a href="{% url 'edit_profile' %}">Edit Profile</a></li>
+    </ul>
+</li>
+<li><a href="{% url 'messages' %}"><i class="fa fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+<li><a href="#">Follower Feed</a></li>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-2"></div>
+        <div class="col-lg-8">
+            <div class="panel">
+                <div class="panel-body" align="left">
+                    <h2 class="lead">Message From &emsp;
+                    <img src="{{ sender.profile_pic.url }}" height="45" width="45" class="img-circle">
+                        <a href="{% url 'profile_page' message.sender %}">{{ message.sender }}</a>
+                    </h2>
+                    <footer>Sent on {{ message.timestamp|date:"F, d, Y, g:i A" }} CST</footer>
+
+                    <hr>
+                    <div>
+                        {{ message.content }}
+                    </div>
+
+                    <hr>
+                    <a href="{% url 'send_message' message.sender.username %}" onclick="return popitup('{% url 'send_message' message.sender.username %}')">
+                        <input type="submit" class="btn btn-default" value="Reply">
+                    </a>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2"></div>
+    </div>
+</div>
+
+<script language="javascript" type="text/javascript">
+
+function popitup(url) {
+	newwindow=window.open(url,'name','height=750,width=1000');
+	if (window.focus) {newwindow.focus()}
+	return false;
+}
+</script>
+{% endblock %}
+
+</body>
+</html>

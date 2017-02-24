@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     {% block title %}
-    <title>User Profile</title>
+    <title>{{ user }} Profile</title>
     {% endblock %}
 </head>
 <body>
@@ -13,12 +13,12 @@
 <li><a href="{% url 'home' %}">Home <span class="sr-only">(current)</span></a></li>
 <li class="dropdown; active">
     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                       aria-expanded="false">{{ request.user.first_name }} <span class="caret"></span></a>
+       aria-expanded="false">{{ request.user.first_name }} <span class="caret"></span></a>
     <ul class="dropdown-menu">
-        <li class="active"><a href="#">My Account</a></li>
-        <li><a href="{% url 'edit_profile' %}">Edit Account Information</a></li>
+        <li class="active"><a href="#">Profile</a></li>
+        <li><a href="{% url 'edit_profile' %}">Edit Profile</a></li>
     </ul>
-    <li><a href="{% url 'messages' %}"><i class="fa fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+<li><a href="{% url 'messages' %}"><i class="fa fa-envelope fa-lg" aria-hidden="true"></i></a></li>
 <li><a href="#">Follower Feed</a></li>
 </li>
 {% endblock %}
@@ -46,36 +46,44 @@
                                     <div itemscope="" itemtype="http://schema.org/Person"><br>
                                         <span>
                                             {% if user.is_authenticated and user == request.user %}
-                                            <form id="pic_upload" class="form-singin" action="" method="post" enctype="multipart/form-data">
+                                            <form id="pic_upload" class="form-singin" action="" method="post"
+                                                  enctype="multipart/form-data">
                                                 {% csrf_token %}
-                                                {{ form }}<br>
-                                                <input type="submit" class="btn btn-primary btn-sm" value="Upload">
+                                                {{ form.as_table }} <br>
+                                                <input type="submit" name="picture" class="btn btn-primary btn-sm"
+                                                       value="Upload">
                                             </form>
                                             {% endif %}
                                         </span>
-                                        <h2> <span itemprop="name">{{ user.username }}</span></h2>
+                                        <h2><span itemprop="name">{{ user.username }}</span></h2>
                                         <p itemprop="jobTitle">First Name: {{ user.first_name }}</p>
                                         <p><span itemprop="affiliation">Last Name: {{ user.last_name }}</span></p>
                                         <p>
                                             <i class="fa fa-birthday-cake"></i> <span itemprop="birthDate">Age: {{ age }}</span>
                                         </p>
-                                         {% if user_profile.gender == 'F' %}
-                                            <p><i class="fa fa-venus-mars"></i> Gender: Female</p>
+                                        {% if user_profile.gender == 'F' %}
+                                        <p><i class="fa fa-venus-mars"></i> Gender: Female</p>
                                         {% else %}
-                                            <p><i class="fa fa-venus-mars"></i> Gender: Male</p>
+                                        <p><i class="fa fa-venus-mars"></i> Gender: Male</p>
                                         {% endif %}
                                         {% if user.is_authenticated and user == request.user %}
-                                        <p itemprop="email"> <i class="fa fa-envelope"> </i> <a href="mailto:{{ user.email }}">{{ user.email }}</a> </p>
+                                        <p itemprop="email"><i class="fa fa-envelope"> </i> <a
+                                                href="mailto:{{ user.email }}">{{ user.email }}</a></p>
                                         {% endif %}
                                     </div>
                                 </div>
                             </div>
+
+                            <hr>
                         </div>
+
+
                         <div class="col-lg-12 centered-text">
+                            <p class="lead" align="center">Bio</p>
                             {% if user_profile.bio %}
-                                {{ user_profile.bio }}
+                            {{ user_profile.bio }}
                             {% else %}
-                                You have yet to enter a bio.
+                            You have yet to enter a bio.
                             {% endif %}
                         </div>
                     </div>
@@ -84,26 +92,40 @@
                     {% if user.is_authenticated and user != request.user %}
                     <a href="{% url 'send_message' user.username  %}" onclick="return popitup('{% url 'send_message' user.username %}')">
                         <input type="button" class="btn btn-default" value="Send Message" name="send-message"></a>
+
+
                     {% if request.user.id in followers %}
-                    <a href="{% url 'unfollow' user_profile %}"><input type="submit" value="Following" class="btn btn-success"
-                                       onmouseover="this.value='Unfollow';return true"
-                                       onmouseout="this.value='Following'; return true;">
+                    <a href="{% url 'unfollow' user_profile %}"><input type="submit" value="Following"
+                                                                       class="btn btn-success"
+                                                                       onmouseover="this.value='Unfollow';return true"
+                                                                       onmouseout="this.value='Following'; return true;">
                     </a>
                     {% else %}
-                    <a href="{% url 'follow' user_profile %}"><input type="submit" value="Follow" class="btn btn-default"></a>
+                    <a href="{% url 'follow' user_profile %}"><input type="submit" value="Follow"
+                                                                     class="btn btn-default"></a>
                     {% endif %}
                     {% endif %}
                 </div>
 
-<script language="javascript" type="text/javascript">
 
+                <script language="javascript" type="text/javascript">
 function popitup(url) {
 	newwindow=window.open(url,'name','height=750,width=1000');
 	if (window.focus) {newwindow.focus()}
 	return false;
 }
-</script>
-{% endblock %}
+
+
+$('#messageForm').submit(function(e) {
+    e.preventDefault();
+    // Coding
+    $('#IDModal').modal('hide'); //or  $('#IDModal').modal('hide');
+    return false;
+});
+
+
+                </script>
+                {% endblock %}
 
 </body>
 </html>

@@ -1,0 +1,64 @@
+{% extends 'home.html' %}
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% block title %}
+    <title>Messages</title>
+    {% endblock %}
+</head>
+<body>
+{% block nav-active %}
+<li><a href="{% url 'home' %}">Home <span class="sr-only">(current)</span></a></li>
+<li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+       aria-expanded="false">{{ request.user.first_name }} <span class="caret"></span></a>
+    <ul class="dropdown-menu">
+        <li><a href="{% url 'profile_page' user %}">Profile</a></li>
+        <li><a href="{% url 'edit_profile' %}">Edit Profile</a></li>
+    </ul>
+</li>
+<li class="active"><a href="#"><i class="fa fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+<li><a href="#">Follower Feed</a></li>
+{% endblock %}
+
+{% block content %}
+<div class="container" align="center">
+    <div class="row">
+        <div class="col-lg-1"></div>
+        <div class="col-lg-10">
+            <div class="panel panel-primary">
+                <div class="panel-heading"><h3>Messages</h3></div>
+                <div class="panel-body">
+                    <p>You have {{ messages.count }} message{{ messages.count|pluralize }}</p>
+                </div>
+                {% if messages %}
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <td><strong>Message</strong></td>
+                        <td><strong>From</strong></td>
+                        <td><strong>Sent</strong></td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for message in messages %}
+                    <tr>
+                        <td><a href="{% url 'message' message.id %}">{{ message.truncate_content }}</a></td>
+                        <td><a href="{% url 'profile_page' message.sender %}">{{ message.sender }}</a></td>
+                        <td>{{ message.timestamp|date:"F, d, Y, g:i A" }} CST</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-lg-1"></div>
+    </div>
+</div>
+{% endblock %}
+
+</body>
+</html>

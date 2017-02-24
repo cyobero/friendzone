@@ -216,23 +216,24 @@ def profile_page(request, username):
 
         # Form that allows users to change their profile picture.
         if request.method == 'POST':
-            form = ChangeProfilePic(request.POST, request.FILES or None)
-            profile_pic = request.FILES['picture']
+            if request.POST.get('picture'):
+                form = ChangeProfilePic(request.POST, request.FILES or None)
+                profile_pic = request.FILES['picture']
 
-            # Save profile pic
-            user_profile.profile_pic = profile_pic
-            user_profile.save()
+                # Save profile pic
+                user_profile.profile_pic = profile_pic
+                user_profile.save()
+
+                return HttpResponseRedirect(reverse('profile_page', kwargs={'username': request.user.username}))
+
+            if request.POST.get('send_message'):
+                form = MessageForm(request.POST)
+
         else:
             form = ChangeProfilePic()
             return render(request, 'profile.html',
                           {'form': form, 'user': user, 'user_profile': user_profile, 'age': age, 'followers': followers})
 
-        return render(request, 'profile.html',
-                      {'form': form,
-                       'user': user,
-                       'user_profile': user_profile,
-                       'age': age,
-                       'followers': followers})
     else:
         return HttpResponseRedirect(reverse('home'))
 
@@ -316,7 +317,7 @@ def post(request, username, post_id):
                         parent_object = parent_qs.first()
 
                 # Create Comment object
-                Comment.objects.create_comment(user=request.user, post=post, comment=answer, parent=parent_object).save()
+                Comment.objects.create_comment(user=request.user, post=post, comment=answer, parent=parent_object)
 
             return HttpResponseRedirect(post.get_absolute_url())
 
@@ -324,7 +325,7 @@ def post(request, username, post_id):
         comments = Comment.objects.filter(post_id=post_id)
         comment_count = comments.count()
         return render(request, 'post.html', {
-            'comments': comments,
+            'comments': [comment for comment in comments if comment.is_parent],
             'post': post,
             'form': form,
             'comment_count': comment_count})
@@ -338,7 +339,7 @@ def about(request):
 
 @login_required
 def delete_comment(request, comment_id):
-    comment = get_object_or_404(Comment, id=comment_id)
+    comment = Comment.objects.get(id=int(comment_id))
 
     if comment.user.id != request.user.id:
         raise Http404
@@ -357,11 +358,6 @@ def delete_post(request, post_id):
 
 
 @login_required
-def messages(request):
-    return render(request, 'messages.html')
-
-
-@login_required
 def send_message(request, username):
     sender = request.user
     recepient = get_object_or_404(User, username=username)
@@ -371,19 +367,44 @@ def send_message(request, username):
 
         if form.is_valid():
             form = form.clean()
-            message = form['message']
+            content = form['message']
+            parent_object = None
+            try:
+                parent_id = int(request.POST.get('parent_id'))
+            except:
+                parent_id = None
+
+            if parent_id:
+                parent_qs = Message.objects.filter(id=parent_id)
+                if parent_qs.exists() and parent_qs.count() == 1:
+                    parent_object = parent_qs.first()
 
             # Create Message object
-            Message.objects.create_message(sender=sender, recepient=recepient, content=message).save()
+            Message.objects.create_message(sender=sender, recpient=recepient, content=content, parent=parent_object)
 
         return HttpResponse('<script type="text/javascript">window.close(); window.parent.location.href = "/";</script>')
 
     else:
         form = MessageForm()
-        return render(request, 'send_message.html', {'form': form, 'recepient': recepient})
+        messages = Message.objects.filter(recepient=recepient)
+        return render(request, 'send_message.html', {'form': form, 'recepient': recepient, 'messages': messages})
 
 
 @login_required
-def messages(request):
+def inbox(request):
     messages = Message.objects.filter(recepient=request.user)
-    return render(request, 'messages.html', {'messages': messages})
+    return render(request, 'inbox.html', {'messages': messages})
+
+
+@login_required
+def message(request, message_id):
+    try:
+        message_id = int(message_id)
+    except ValueError:
+        raise Http404
+    message = get_object_or_404(Message, id=message_id)
+    sender = get_object_or_404(UserProfile, user_id=message.sender_id)
+    if request.user == message.recepient:
+        return render(request, 'message.html', {'message': message, 'sender': sender})
+    else:
+        raise Http404

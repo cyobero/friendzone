@@ -1,4 +1,5 @@
 {% load staticfiles %}
+{% load crispy_forms_tags %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,7 +41,7 @@
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
                        aria-expanded="false">{{ request.user.first_name }} <span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                        <li><a href="{% url 'profile_page' user %}">My Account</a></li>
+                        <li><a href="{% url 'profile_page' user %}">Profile</a></li>
                         <li><a href="{% url 'edit_profile' %}">Edit Profile</a></li>
                     </ul>
                 </li>
@@ -65,8 +66,8 @@
             <form id="question_form" align="center" role="form" action="" method="post">
                 {% csrf_token %}
                 <table>
-                    {{ form.as_table }}
-                </table><br>
+                   {{ form.as_table }}
+                </table> <br>
                 <input type="submit" class="btn btn-primary" value="Submit Question">`
             </form>
         </div>
@@ -94,11 +95,13 @@
                         </small>
                     </p>
                     <footer><i class="fa fa-clock-o" aria-hidden="true"></i>
-                        Posted on {{ post.timestamp|date:"F d, Y, g:i A" }} CST</footer><br>
+                        Posted on {{ post.timestamp|date:"F d, Y, g:i A" }} CST
+                    </footer>
+                    <br>
                     {% if post.content|length > 250 %}
                     <p>{{ post.truncate_content }} <a href="{% url 'post' post.author post.id %}">Read More</a></p>
                     {% else %}
-                    <p>{{ post.content }}</p><br>
+                    <p>{{ post.content }}</p>
                     {% endif %}
                     <hr>
                     {% endfor %}
@@ -120,7 +123,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-3"></div>
+        <div class="col-lg-3"><img src="/media/ad.png"></div>
     </div>
 </div>
 {% endblock %}

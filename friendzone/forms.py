@@ -118,12 +118,14 @@ class QuestionForm(forms.Form):
         'placeholder': 'What is your question?',
         'size': '70',
         'align': 'left',
-        'rows': '2'
+        'rows': '2',
+        'styl': 'display:inline-block;vertical-align:middle'
     }))
     content = forms.CharField(label='', required=False, widget=forms.Textarea(attrs={
         'class': 'form-control',
         'placeholder': 'Enter details of your question here...',
-        'rows': '4'
+        'rows': '4',
+        'style': 'display:inline-block;vertical-align:middle'
     }))
 
 

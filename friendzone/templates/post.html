@@ -1,5 +1,6 @@
 {% extends 'home.html' %}
 {% load staticfiles %}
+{% load crispy_forms_tags %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -16,7 +17,7 @@
     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
        aria-expanded="false">{{ request.user.first_name }} <span class="caret"></span></a>
     <ul class="dropdown-menu">
-        <li><a href="{% url 'profile_page' user.username %}">My Account</a></li>
+        <li><a href="{% url 'profile_page' user.username %}">Profile</a></li>
         <li><a href="{% url 'edit_profile' %}">Edit Profile</a></li>
     </ul>
 <li><a href="{% url 'messages' %}"><i class="fa fa-envelope fa-lg" aria-hidden="true"></i></a></li>
@@ -42,31 +43,35 @@
                     <hr>
                     {{ post.content }}<br>
                     {% if user.is_authenticated and post.author == request.user %}
-                    <a href="{% url 'delete_post' post.id %}">Delete Question</a>
+                    <a href="{% url 'delete_post' post.id %}">Delete Question </a>|
+                    <a href="#"> Edit Question</a>
                     {% endif %}
 
-                    <hr>
+                    <hr/>
+                    <br/>
+
                     <!-- This is where the comments will go -->
                     <div>
+
                         <p class="lead">Answers <br><font size="2">{{ comment_count }} answer{{comment_count|pluralize}}
                         </font></p>
                         <div class="">
                             <form id="answer_form" role="form" action="" method="post">
                                 {% csrf_token %}
-                                {{ form.as_p }}
+                                {{ form|crispy }}
                                 <input type="submit" class="btn btn-primary btn-sm" value="Answer Question">
                             </form>
-                        </div>
+                            <hr/>
 
-                       <hr>
-
-                        <div>
                             {% for comment in comments %}
-                                <blockquote>
-                                <p>
+                            <blockquote>
+                                <p class="h5">
+                                    {% if comment.is_parent %}
                                     {{ comment.comment }}
                                     {% if user.is_authenticated and comment.user == request.user %}
-                                    <a href="{% url 'delete_comment' comment.id %}">Delete Comment</a>
+                                    <a href="{% url 'delete_comment' comment.id %}">Delete Comment </a>|
+                                    <a href="#"> Edit Comment</a>
+                                    {% endif %}
                                     {% endif %}
                                 </p>
                                 <footer class="blockquote-footer" style="font-size:13px"><strong>posted by </strong><a
@@ -75,43 +80,44 @@
                                     on {{ comment.timestamp|date:"F, d, Y, g:i A" }} CST
                                 </footer>
 
-
-
-                                {% if comment_count > 0 %}
-                                <!-- Reply form -->
-                                <form id="reply" role="form" action="" method="post">
-                                    {% csrf_token %}
-                                    {{ form.as_p }}
-                                    <input type="hidden" name="parent_id" value="{{ comment.id }}">
-                                    <input type="submit" name="reply" value="Reply" class="btn btn-default">
-                                    <input type="submit" name="upvote" value="Upvote" class=" btn btn-primary">
-                                </form>
-                                {% endif %}
-
-                                </blockquote>
                                 {% for child_comment in comment.children %}
                                 <blockquote>
-                                    <p>{{ child_comment.comment }}</p>
+                                    <p class="h5">
+                                        {{ child_comment.comment }}
+                                        {% if user.is_authenticated and child_comment.user == request.user %}
+                                        <a href="{% url 'delete_comment' child_comment.id %}">Delete Comment </a>|
+                                        <a href="#"> Edit Comment</a>
+                                        {% endif %}
+                                    </p>
+                                    <footer class="blockquote-footer" style="font-size:13px"><strong>posted by </strong><a
+                                            href="{% url 'profile_page' child_comment.user %}">
+                                        {{ child_comment.user }}</a>
+                                        on {{ child_comment.timestamp|date:"F, d, Y, g:i A" }} CST
+                                    </footer>
                                 </blockquote>
                                 {% endfor %}
-                                {% endfor %}
 
+                                <br/>
 
+                                <form method="post" action="">
+                                    {% csrf_token %}
+                                    {{ form|crispy }}
+                                    <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                                    <input type="submit" class="btn btn-primary btn-sm" value="Reply">
+                                </form>
 
+                            </blockquote>
 
-
-
-
-                            <hr>
+                            <hr/>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
             </div>
+            <div class="col-lg-2"></div>
         </div>
-        <div class="col-lg-2"></div>
     </div>
-</div>
-{% endblock %}
+    {% endblock %}
 
 </body>
 </html>
